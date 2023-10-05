@@ -421,6 +421,7 @@ PYBIND11_MODULE(dashboard_client, m)
   m.doc() = "Dashboard Client";
   py::class_<DashboardClient>(m, "DashboardClient")
       .def(py::init<std::string, int, bool>(), py::arg("hostname"), py::arg("port") = 29999, py::arg("verbose") = false)
+      .def("setDefaultTimeout", &DashboardClient::setDefaultTimeout, py::arg("timeout_ms"), py::call_guard<py::gil_scoped_release>())
       .def("connect", &DashboardClient::connect, py::arg("timeout_ms") = 2000, py::call_guard<py::gil_scoped_release>())
       .def("isConnected", &DashboardClient::isConnected, py::call_guard<py::gil_scoped_release>())
       .def("disconnect", &DashboardClient::disconnect, py::call_guard<py::gil_scoped_release>())
