@@ -91,11 +91,18 @@ void RTDE::disconnect()
 {
   if (ConnectionState::CONNECTED == conn_state_)
   {
-   sendPause();
+    try
+    {
+      sendPause();
+    }
+    catch(const std::exception& e)
+    {
+      std::cerr << "Failed to send pause while disconnecting: " << e.what() << std::endl;
+    }
   }
   /* We use reset() to safely close the socket,
-   * see: https://stackoverflow.com/questions/3062803/how-do-i-cleanly-reconnect-a-boostsocket-following-a-disconnect
-   */
+  * see: https://stackoverflow.com/questions/3062803/how-do-i-cleanly-reconnect-a-boostsocket-following-a-disconnect
+  */
   socket_.reset();
   conn_state_ = ConnectionState::DISCONNECTED;
   if (verbose_)
