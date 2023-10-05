@@ -32,6 +32,11 @@ class DashboardClient
 
  public:
   /**
+   * Set default timeout value in msec.
+   */
+  RTDE_EXPORT void setDefaultTimeout(uint32_t timeout_ms);
+
+  /**
    * Connects to the dashboard server with the given timeout value.
    */
   RTDE_EXPORT void connect(uint32_t timeout_ms = 2000);
@@ -179,12 +184,10 @@ class DashboardClient
  private:
   /**
    * Reads a single line (until newline) with timeout
-   * If no timeout is given (value < 0) then an internal default timeout
-   * values is used
    * \return The received data string without newline
    */
   template <typename AsyncReadStream>
-  std::string async_readline(AsyncReadStream& s, int timeout_ms = -1);
+  std::string async_readline(AsyncReadStream& s);
 
   /**
    * For socket timeouts
@@ -200,6 +203,7 @@ class DashboardClient
   std::shared_ptr<boost::asio::ip::tcp::resolver> resolver_;
   boost::asio::deadline_timer deadline_;
   boost::asio::streambuf input_buffer_;
+  boost::posix_time::milliseconds default_timeout_;
 };
 
 }  // namespace ur_rtde

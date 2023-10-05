@@ -26,7 +26,8 @@ DashboardClient::DashboardClient(std::string hostname, int port, bool verbose)
       port_(port),
       verbose_(verbose),
       conn_state_(ConnectionState::DISCONNECTED),
-      deadline_(io_service_)
+      deadline_(io_service_),
+      default_timeout_(2500)
 {
   // No deadline is required until the first socket operation is started. We
   // set the deadline to positive infinity so that the actor takes no action
@@ -38,6 +39,11 @@ DashboardClient::DashboardClient(std::string hostname, int port, bool verbose)
 }
 
 DashboardClient::~DashboardClient() = default;
+
+void DashboardClient::setDefaultTimeout(uint32_t timeout_ms)
+{
+  default_timeout_ = boost::posix_time::milliseconds(timeout_ms);
+}
 
 void DashboardClient::connect(uint32_t timeout_ms)
 {
@@ -227,17 +233,12 @@ void DashboardClient::unlockProtectiveStop()
 }
 
 template <typename AsyncReadStream>
-std::string DashboardClient::async_readline(AsyncReadStream &s, int timeout_ms)
+std::string DashboardClient::async_readline(AsyncReadStream &s)
 {
-  if (timeout_ms < 0)
-  {
-    timeout_ms = 2500;
-  }
-
   // Set a deadline for the asynchronous operation. Since this function uses
   // a composed operation (async_read_until), the deadline applies to the
   // entire operation, rather than individual reads from the socket.
-  deadline_.expires_from_now(boost::posix_time::milliseconds(timeout_ms));
+  deadline_.expires_from_now(default_timeout_);
 
   // Set up the variable that receives the result of the asynchronous
   // operation. The error code is set to would_block to signal that the
